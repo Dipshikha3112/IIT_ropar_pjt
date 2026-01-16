@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Smart Content Recommender</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        body {
+            font-family: Arial;
+            background: #111;
+            color: white;
+        }
+
+        /* 🔥 Top sliding banner */
+        .marquee {
+            background: linear-gradient(90deg, #00ffaa, #00aaff, #ff00ff);
+            color: black;
+            padding: 10px 0;
+            overflow: hidden;
+            white-space: nowrap;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .marquee span {
+            display: inline-block;
+            padding-left: 100%;
+            animation: scroll-left 18s linear infinite;
+        }
+
+        @keyframes scroll-left {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-100%); }
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: 3fr 1fr;
+            gap: 30px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: #1c1c1c;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 0 10px rgba(0,0,0,0.4);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-6px) scale(1.02);
+        }
+
+        .card img {
+            width: 100%;
+            height: 240px;
+            object-fit: cover;
+            filter: blur(6px);
+            transition: filter 0.5s ease;
+        }
+
+        .card img.loaded {
+            filter: blur(0);
+        }
+
+        .card-content {
+            padding: 10px;
+        }
+
+        .sidebar {
+            background: #1a1a1a;
+            padding: 20px;
+            border-radius: 12px;
+        }
+
+        .context-bar span {
+            margin-right: 20px;
+            color: #00ffaa;
+            font-weight: bold;
+        }
+
+        .title {
+            text-align: center;
+            margin: 20px 0;
+            font-size: 36px;
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- 🔥 Advertising / Announcement Bar -->
+<div class="marquee">
+    <span>
+        🚀 AI Powered Recommender • 🎬 Smart Movies • 📰 Live News • 🛍 Personalized Products • 
+        😄 Emotion Aware • 📍 Location Based • ⏰ Time Smart • Built by You • Powered by AI •
+    </span>
+</div>
+
+<h1 class="title">🎬 Smart Content Recommender 🤖✨</h1>
+
+<div class="context-bar">
+    <span id="emotion">😐 Emotion: ...</span>
+    <span id="time">⏰ Time: ...</span>
+    <span id="location">📍 Location: ...</span>
+</div>
+
+<div class="search-box">
+    <input id="search" placeholder="Search movies, news, products...">
+    <button onclick="search('movies')">🎬 Movies</button>
+    <button onclick="search('news')">📰 News</button>
+    <button onclick="search('products')">🛍 Products</button>
+</div>
+
+<div class="layout">
+
+    <!-- MAIN CONTENT -->
+    <div>
+
+        <h2>🔥 Emotion Based Recommendations</h2>
+        <div class="grid" id="search-results"></div>
+
+        <h2>🎲 Discover Movies</h2>
+        <div class="grid" id="random-movies"></div>
+
+        <h2>📰 Discover News</h2>
+        <div class="grid" id="random-news"></div>
+
+        <h2>🛍 Discover Products</h2>
+        <div class="grid" id="random-products"></div>
+
+    </div>
+
+    <!-- TRENDING SIDEBAR -->
+    <div class="sidebar">
+        <h2>📈 Trending Now</h2>
+
+        <h3>🎬 Movies</h3>
+        <div class="grid" id="trending-movies"></div>
+
+        <h3>📰 News</h3>
+        <div class="grid" id="trending-news"></div>
+
+        <h3>🛍 Products</h3>
+        <div class="grid" id="trending-products"></div>
+    </div>
+
+</div>
+
+<script>
+let lastEmotion = null;
+
+function generateImage(title) {
+    return `https://picsum.photos/400/300?random=${encodeURIComponent(title)}`;
+}
+
+function renderGrid(container, items) {
+    container.innerHTML = "";
+
+    items.forEach(item => {
+        const div = document.createElement("div");
+        div.className = "card";
+
+        const img = document.createElement("img");
+        img.src = item.image || generateImage(item.title);
+        img.onload = () => img.classList.add("loaded");
+        img.onerror = () => img.src = "https://via.placeholder.com/400x300?text=No+Image";
+
+        const content = document.createElement("div");
+        content.className = "card-content";
+        content.innerHTML = `
+            <h4>${item.title}</h4>
+            <p>⭐ Score: ${item.final_score || ""}</p>
+        `;
+
+        div.appendChild(img);
+        div.appendChild(content);
+        container.appendChild(div);
+    });
+}
+
+async function loadContextAndAutoRecommend() {
+    const res = await fetch("/context");
+    const ctx = await res.json();
+
+    document.getElementById("emotion").innerText = "😄 Emotion: " + ctx.emotion;
+    document.getElementById("time").innerText = "⏰ Time: " + ctx.time_context;
+    document.getElementById("location").innerText = "📍 Location: " + ctx.location;
+
+    // 🔥 If emotion changed, auto refresh recommendations
+    if (ctx.emotion !== lastEmotion) {
+        lastEmotion = ctx.emotion;
+        autoRecommend(ctx.emotion);
+    }
+}
+
+async function autoRecommend(emotion) {
+    const res = await fetch(`/recommend?query=${emotion}&domain=movies`);
+    const data = await res.json();
+    renderGrid(document.getElementById("search-results"), data);
+}
+
+async function search(domain) {
+    const q = document.getElementById("search").value;
+    const res = await fetch(`/recommend?query=${q}&domain=${domain}`);
+    const data = await res.json();
+    renderGrid(document.getElementById("search-results"), data);
+}
+
+async function loadRandom(domain, containerId) {
+    const res = await fetch(`/random?domain=${domain}`);
+    const data = await res.json();
+    renderGrid(document.getElementById(containerId), data);
+}
+
+async function loadTrending() {
+    const res = await fetch("/trending");
+    const data = await res.json();
+
+    renderGrid(document.getElementById("trending-movies"), data.movies);
+    renderGrid(document.getElementById("trending-news"), data.news);
+    renderGrid(document.getElementById("trending-products"), data.products);
+}
+
+loadRandom("movies", "random-movies");
+loadRandom("news", "random-news");
+loadRandom("products", "random-products");
+loadTrending();
+
+// 🔁 Auto refresh context & recommendations every 5 seconds
+setInterval(loadContextAndAutoRecommend, 5000);
+</script>
+
+</body>
+</html>

@@ -1,0 +1,88 @@
+body {
+    background: radial-gradient(circle at top, #020617, #000);
+    color: #e5e7eb;
+    font-family: Arial, Helvetica, sans-serif;
+    margin: 0;
+    padding: 30px;
+}
+
+.title {
+    text-align: center;
+    font-size: 42px;
+    margin-bottom: 20px;
+}
+
+.context-bar {
+    display: flex;
+    gap: 30px;
+    justify-content: center;
+    margin-bottom: 30px;
+    font-size: 18px;
+    background: rgba(255,255,255,0.05);
+    padding: 15px;
+    border-radius: 20px;
+}
+
+.search-box {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.search-box input {
+    padding: 12px;
+    width: 300px;
+    border-radius: 10px;
+    border: none;
+    font-size: 16px;
+}
+
+.search-box button {
+    padding: 12px 20px;
+    border-radius: 10px;
+    border: none;
+    background: #22d3ee;
+    color: black;
+    font-weight: bold;
+    cursor: pointer;
+    margin-left: 10px;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 25px;
+}
+
+.card {
+    background: rgba(255,255,255,0.06);
+    border-radius: 20px;
+    padding: 15px;
+    box-shadow: 0 0 25px rgba(34,211,238,0.25);
+    transition: transform 0.3s;
+}
+
+.card:hover {
+    transform: translateY(-6px) scale(1.03);
+}
+
+.card img {
+    width: 100%;
+    border-radius: 15px;
+    height: 280px;
+    object-fit: cover;
+}
+
+.card h3 {
+    margin: 10px 0 5px;
+}
+
+.badges {
+    font-size: 14px;
+    opacity: 0.8;
+}
+
+.score {
+    color: #22d3ee;
+    font-weight: bold;
+    margin-top: 6px;
+}

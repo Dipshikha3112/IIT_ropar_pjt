@@ -1,0 +1,24 @@
+# Python cache
+__pycache__/
+*.pyc
+
+# Virtual env
+recsys-deepface/
+venv/
+
+# Large data
+data/
+embeddings/
+index/
+
+# Models & binaries
+*.npy
+*.pkl
+*.tgz
+
+# VSCode
+.vscode/
+
+# OS junk
+.DS_Store
+Thumbs.db
